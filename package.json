@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@azure/storage-blob": "^12.26.0",
     "@emailjs/nodejs": "^2.2.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -20,6 +21,7 @@
     "http": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.2.1",
+    "nodemailer": "^6.10.0",
     "nodemon": "^3.1.0",
     "techutsav-final-admin": "file:"
   }
