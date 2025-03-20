@@ -229,25 +229,28 @@ const csvWriter = createCSVWriter({
 });
 
 // Download data endpoint with department filtering
+
+
+const createCsvWriter = require("csv-writer").createObjectCsvWriter;
+
+
+
 app.get("/downloadData", requireAuth, async (req, res) => {
-  // Get department from JWT token
   const department = req.user.department;
-  
+
   try {
-    // Remove existing CSV file if it exists
-    try {
+    // Remove existing CSV file safely
+    if (fs.existsSync(fileUrl)) {
       fs.unlinkSync(fileUrl);
-    } catch (err) {
-      console.log("File Not Found!");
     }
 
     let query = {};
-    // If department is specified and not 'all', filter by department
-    if (department && department !== 'all') {
+    if (department && department !== "all") {
       query = { selectedDepartment: department };
     }
-    
+
     const data = await User.find(query);
+
     const newList = data.map(
       (
         {
@@ -258,8 +261,8 @@ app.get("/downloadData", requireAuth, async (req, res) => {
           department,
           paid,
           transactionNumber,
+          transactionScreenshot,
           selectedDepartment,
-          ...row
         },
         index
       ) => ({
@@ -271,17 +274,35 @@ app.get("/downloadData", requireAuth, async (req, res) => {
         department,
         paid: paid ? "Yes" : "No",
         transactionNumber,
+        transactionScreenshot, // Include image URL
         selectedDepartment,
       })
     );
-    
+
+    const csvWriter = createCsvWriter({
+      path: fileUrl,
+      header: [
+        { id: "sno", title: "S.No" },
+        { id: "email", title: "Email" },
+        { id: "fullName", title: "Full Name" },
+        { id: "phoneNumber", title: "Phone Number" },
+        { id: "collegeName", title: "College Name" },
+        { id: "department", title: "Department" },
+        { id: "paid", title: "Paid" },
+        { id: "transactionNumber", title: "Transaction Number" },
+        { id: "transactionScreenshot", title: "Transaction Screenshot" }, // Added image URL
+        { id: "selectedDepartment", title: "Selected Department" },
+      ],
+    });
+
     await csvWriter.writeRecords(newList);
     res.status(200).download(fileUrl);
   } catch (err) {
-    console.error(err);
+    console.error("Error generating CSV:", err);
     res.status(400).json({ msg: "Error downloading data" });
   }
 });
+
 
 
 mongoose
